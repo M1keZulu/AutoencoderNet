@@ -8,6 +8,7 @@ import pickle
 from flask import jsonify
 import cv2
 from sklearn.cluster import AffinityPropagation
+from sklearn.mixture import GaussianMixture
 
 app = Flask(__name__)
 
@@ -18,6 +19,21 @@ ALLOWED_EXT = set(['jpg' , 'jpeg' , 'png'])
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXT
+
+
+def check_face(image):
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1)
+    extracted_faces = []
+    for (x, y, w, h) in faces:
+        face = image[y:y+h, x:x+w]
+        extracted_faces.append(face)
+    
+    if len(extracted_faces) == 0:
+        return False
+    else:
+        return True
 
 def extract_face(filename):
     protoPath = os.path.join(BASE_DIR, "models/deploy.prototxt")
@@ -34,10 +50,11 @@ def extract_face(filename):
         (x1, y1, x2, y2) = box.astype("int")
         confidence = detections[0, 0, i, 2]
 
-        if (confidence > 0.8):
+        if (confidence > 0.1) and check_face(image):
             frame = image[y1:y2, x1:x2]
             if (frame.size != 0):
                 images.append(frame)
+
     return images
             
 def generate(filename):
@@ -47,7 +64,7 @@ def generate(filename):
     embedding = []
     for i in img:
         i = cv2.cvtColor(i, cv2.COLOR_BGR2GRAY)
-        #cv2.imwrite("test.jpg", i)
+        cv2.imwrite(f"test{i}.jpg", i)
         i = cv2.resize(i, img_size)
         i = np.array(i, dtype=np.float32) / 255.0
         i = i.reshape(1, img_size[0], img_size[1], num_channels)
@@ -58,12 +75,12 @@ def generate(filename):
     os.remove(filename)
     return embedding, len(embedding)
 
-def AP_Clustering(data_2d):
-    affinity_propagation = AffinityPropagation(random_state=0)
+def AP_Clustering(data_2d, user_labels=None):
+    affinity_propagation = AffinityPropagation(max_iter=100000, random_state=0)
     affinity_propagation.fit(data_2d)
-    print(data_2d.shape)
     labels = affinity_propagation.predict(data_2d)
     return labels
+
 
 @app.route('/')
 def home():
@@ -73,9 +90,10 @@ def home():
 def cluster():
     if request.method == 'POST':
         embeddings = request.json['embeddings']
+        user_labels = request.json['labeled_data']
         embeddings = np.array(embeddings)
-        labels = AP_Clustering(embeddings)
-        return jsonify({'names': request.json['names'], 'labels': labels.tolist()}) 
+        labels = AP_Clustering(embeddings, user_labels)
+        return jsonify({'labels': labels.tolist()}) 
     else:
         return jsonify({'error' : 'POST request not found'})
 

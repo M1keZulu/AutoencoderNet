@@ -20,7 +20,7 @@ use App\Http\Controllers\CommentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-
+Route::get('/clusters', [AdminController::class, 'clusters'])->name('clusters');
 Route::get('/comment/get', [HomeController::class, 'show'])->name('comment.show');
 
 Route::get('/dashboard', function () {
