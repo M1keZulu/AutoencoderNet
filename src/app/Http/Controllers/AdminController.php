@@ -57,7 +57,15 @@ class AdminController extends Controller
                 $embedding = new Embeddings;
                 $embedding->image_id = $image->id;
                 $embedding->embedding = serialize($response['embeddings'][$i]);
-                $embedding->save();
+
+                $image_embed = $response['images'][$i];
+                $image_embed = base64_decode($image_embed);
+                $image_embed = imagecreatefromstring($image_embed);
+                $imagePath = time() . '_' . $i . '.jpg';
+                imagejpeg($image_embed, storage_path('app/public/images/' . $imagePath));
+                $embedding->image_path = $imagePath;
+
+                $embedding->save();               
             }
 
         } catch (\Exception $e) {
@@ -159,31 +167,31 @@ class AdminController extends Controller
         Storage::delete($StoragePath);
         $image->delete();
 
-        // try {
-        //     $url = \config('api.url') . '/cluster';
-        //     $client = new \GuzzleHttp\Client();
-        //     $embeddings = Embeddings::all();
-        //     $embeddings = $embeddings->map(function($embedding) {
-        //         return unserialize($embedding->embedding);
-        //     });
-        //     $embeddings = $embeddings->toArray();
-        //     $response = $client->request('POST', $url, [
-        //         'json' => [
-        //             'embeddings' => $embeddings
-        //         ]
-        //     ]);
-        //     $response = json_decode($response->getBody(), true);
-        //     $clusters = $response['labels'];
+        try {
+            $url = \config('api.url') . '/cluster';
+            $client = new \GuzzleHttp\Client();
+            $embeddings = Embeddings::all();
+            $embeddings = $embeddings->map(function($embedding) {
+                return unserialize($embedding->embedding);
+            });
+            $embeddings = $embeddings->toArray();
+            $response = $client->request('POST', $url, [
+                'json' => [
+                    'embeddings' => $embeddings
+                ]
+            ]);
+            $response = json_decode($response->getBody(), true);
+            $clusters = $response['labels'];
             
-        //     $embedding = Embeddings::all();
-        //     foreach ($embedding as $key => $value) {
-        //         $value->cluster = $clusters[$key];
-        //         $value->update();
-        //     }
-        // } catch (\Exception $e) {
-        //     Log::error($e);
-        //     return redirect()->route('home')->with('error', 'Image deleted but clustering failed');
-        // }
+            $embedding = Embeddings::all();
+            foreach ($embedding as $key => $value) {
+                $value->cluster = $clusters[$key];
+                $value->update();
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return redirect()->route('home')->with('error', 'Image deleted but clustering failed');
+        }
 
         return redirect()->route('home')->with('success', 'Image deleted successfully');
     }

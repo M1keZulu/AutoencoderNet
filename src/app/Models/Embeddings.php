@@ -12,7 +12,8 @@ class Embeddings extends Model
     protected $fillable = [
         'image_id',
         'embedding',
-        'cluster'
+        'cluster',
+        'image_path'
     ];
 
     public function image()
