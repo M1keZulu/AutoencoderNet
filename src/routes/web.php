@@ -37,6 +37,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/comment/create', [CommentController::class, 'store'])->name('comment.store');
 });
 
-URL::forceScheme('https');
+//URL::forceScheme('https');
 
 require __DIR__.'/auth.php';
