@@ -19,7 +19,7 @@ import base64
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_VERSION = 1
+MODEL_VERSION = "casia-cnn-128.pkl"
 
 ALLOWED_EXT = set(['jpg' , 'jpeg' , 'png'])
 def allowed_file(filename):
@@ -110,7 +110,7 @@ def generate(filename):
         with open(file_name, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
             images.append(encoded_string.decode('utf-8'))
-        with open(f"models/cnn-casia-webface-bhaswara-implementation-5epochs.pkl", "rb") as f:
+        with open(f"models/{MODEL_VERSION}", "rb") as f:
             model = pickle.load(f)
             embedding.append(model.predict(i).tolist()[0])
     os.remove(filename)
