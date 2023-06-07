@@ -1,6 +1,6 @@
 # Exploring Unsupervised Learning Appraoches to Facial Recognition using Autoencoders
 
-
+![](https://github.com/M1keZulu/AutoencodersNet/blob/main/demo-gif.gif?raw=true)
 
 Facial recognition has seen remarkable growth in various domains such as
 security surveillance, identification and social media platforms. A
