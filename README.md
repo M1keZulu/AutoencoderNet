@@ -1,4 +1,6 @@
-# Introduction
+# Exploring Unsupervised Learning Appraoches to Facial Recognition using Autoencoders
+
+
 
 Facial recognition has seen remarkable growth in various domains such as
 security surveillance, identification and social media platforms. A
