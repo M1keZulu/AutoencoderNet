@@ -1,4 +1,4 @@
-# Exploring Unsupervised Learning Appraoches to Facial Recognition using Autoencoders
+# AutoencoderNet - Exploring Unsupervised Learning Appraoches to Facial Recognition using Autoencoders
 
 ![](https://github.com/M1keZulu/AutoencodersNet/blob/main/demo-gif.gif?raw=true)
 
